@@ -1,11 +1,13 @@
 # cellHarmony-Align # 
 
+![cellHarmony workflow](http://altanalyze.org/cellHarmony/cellHarmony-logo2.png)
+
 Python code to align cells from a reference and query scRNA-Seq dataset (h5, mtx, txt or csv) to find cells in the reference that are most similar to cells in query. Each CellRanger h5 file is read and partitioned by clustering on the k-nearest neighbor graph. The h5 files can be restricted to marker genes (recommended) and annotated with a custom labels file (recommended). The GUI wrapper can be found at: [http://www.altanalyze.org](http://www.altanalyze.org)
 
-# Authors #
+### Authors ###
 Phillip Dexheimer (CCHMC), Nathan Salomonis (CCHMC), AltAnalyze team
 
-# Requirements # 
+## Requirements ## 
 
 python 2.7
 scipy
@@ -16,7 +18,7 @@ networkx
 h5py
 gzip
 
-# Usage #
+## Usage ##
 
 ```typescript
 
