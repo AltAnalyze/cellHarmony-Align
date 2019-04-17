@@ -1,11 +1,6 @@
 # cellHarmony-Align # 
 
-usage: cellHarmony_align.py [-h] [-g GENES] [-s GENOME] [-k NUM_NEIGHBORS]
-                            [-t NUM_TREES] [-l LOUVAIN] [-m MIN_CORRELATION]
-                            [-b LABELS]
-                            reference_h5 query_h5 output
-
-Aligns cells from a reference and query scRNA-Seq dataset (h5, mtx, txt or csv) to find cells in the reference that are most similar to cells in query. Each CellRanger h5 file is read and partitioned by clustering on the k-nearest neighbor graph. The h5 files can be restricted to marker genes (recommended) and annotated with a custom labels file (recommended). The GUI wrapper can be found at: [http://www.altanalyze.org](http://www.altanalyze.org)
+Python code to align cells from a reference and query scRNA-Seq dataset (h5, mtx, txt or csv) to find cells in the reference that are most similar to cells in query. Each CellRanger h5 file is read and partitioned by clustering on the k-nearest neighbor graph. The h5 files can be restricted to marker genes (recommended) and annotated with a custom labels file (recommended). The GUI wrapper can be found at: [http://www.altanalyze.org](http://www.altanalyze.org)
 
 # Requirements # 
 
@@ -25,6 +20,12 @@ gzip
 python scr/cellHarmony_align.py  reference/GSM3489185_Donor_02_h5.h5 query/GSM3489183_IPF_01_h5.h5 alignments.txt  --genes genes/markers.txt --lables labels/CustomLabels.txt
 
 ```
+```
+usage: cellHarmony_align.py [-h] [-g GENES] [-s GENOME] [-k NUM_NEIGHBORS]
+                            [-t NUM_TREES] [-l LOUVAIN] [-m MIN_CORRELATION]
+                            [-b LABELS]
+                            reference_h5 query_h5 output
+
 
 positional arguments:
   reference_h5          a CellRanger h5 file
@@ -53,3 +54,4 @@ optional arguments:
   -b LABELS, --labels LABELS
                         a tab-delimited text file with two columns (reference
                         cell barcode and cluster name)
+```
