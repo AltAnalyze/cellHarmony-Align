@@ -38,9 +38,9 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   -g GENES, --genes GENES
-                        an ICGS file with the genes to use
+                        a tab-delimited text file with genes in the first column. Also compatible with ICGS heatmap results.
   -s GENOME, --genome GENOME
-                        genome aligned to
+                        genome aligned to (optional)
   -k NUM_NEIGHBORS, --num_neighbors NUM_NEIGHBORS
                         number of nearest neighbors to use in clustering,
                         default: 10
