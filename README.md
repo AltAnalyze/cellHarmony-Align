@@ -13,7 +13,7 @@ python 2.7
 scipy
 numpy
 annoy
-community
+python-louvain
 networkx
 h5py
 gzip
