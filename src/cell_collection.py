@@ -1,6 +1,11 @@
 from __future__ import print_function
 
-import h5py
+try:
+    import h5py
+    from h5py import defs, utils, h5ac, _proxy # for py2app
+except:
+    print ('Missing the h5py library (hdf5 support)...')
+
 import gzip
 import scipy.io
 from scipy import sparse, stats, io
@@ -78,7 +83,7 @@ class CellCollection:
         return coll
 
     @staticmethod
-    def from_cellranger_mtx(matrix_directory, genome=None, returnGenes=False):
+    def from_cellranger_mtx(mtx_directory, genome=None, returnGenes=False):
 
         """
         Creates a CellCollection from a sparse matrix (.mtx and associated files) exported by CellRanger
@@ -90,18 +95,23 @@ class CellCollection:
         start = time.time()
         coll = CellCollection()
         cellranger_version = 2
-        mtx_file = os.path.join(mtx_directory, "matrix.mtx")
+        if '.mtx' in mtx_directory:
+            mtx_file = mtx_directory ### Hence an mtx file was directly supplied
+            mtx_directory = os.path.abspath(os.path.join(mtx_file, os.pardir))
+        else:
+            mtx_file = os.path.join(mtx_directory, "matrix.mtx")
+            
         if not os.path.exists(mtx_file):
             cellranger_version = 3
             mtx_file = mtx_file + ".gz"
             if not os.path.exists(mtx_file):
                 raise Exception("Directory {} does not contain a recognizable matrix file".format(mtx_directory))
-
-        coll._gene_ids = np.empty((coll._matrix.shape[0], ), np.object)
-        coll._gene_names = np.empty((coll._matrix.shape[0], ), np.object)
-
+        if '.gz' in mtx_file:
+            cellranger_version = 3
         sparse_matrix = io.mmread(mtx_file)
         coll._matrix = sparse_matrix.tocsc()
+        coll._gene_ids = np.empty((coll._matrix.shape[0], ), np.object)
+        coll._gene_names = np.empty((coll._matrix.shape[0], ), np.object)
         
         if cellranger_version == 2:
             with open(os.path.join(mtx_directory, "genes.tsv"), "rU") as f:
@@ -133,6 +143,74 @@ class CellCollection:
             return list(coll._gene_names)
             
         print('sparse matrix data imported from mtx file in %s seconds' % str(time.time()-start))
+        return coll
+
+    @staticmethod
+    def from_tsvfile_alt(tsv_file, genome=None, returnGenes=False, gene_list=None):
+        """
+        Creates a CellCollection from the contents of a tab-separated text file.
+        """
+        startT = time.time()
+        coll = CellCollection()
+        UseDense=False
+        header=True
+        skip=False
+        for line in open(tsv_file,'rU').xreadlines():
+            if header:
+                delimiter = ',' # CSV file
+                start = 1
+                if 'row_clusters' in line:
+                    start=2 # An extra column and row are present from the ICGS file
+                    skip=True
+                if '\t' in line:
+                    delimiter = '\t' # TSV file
+                barcodes = string.split(line.rstrip(),delimiter)[start:]
+                if ':' in line:
+                    barcodes = map(lambda x:x.split(':')[1],barcodes)
+
+                coll._barcodes=barcodes
+                coll._gene_names=[]
+                data_array=[]
+                header=False
+            elif skip:
+                skip=False # Igore the second row in the file that has cluster info
+            else:
+                values = line.rstrip().split(delimiter)
+                gene = values[0]
+                if ' ' in gene:
+                    gene = string.split(gene,' ')[0]
+                if ':' in gene:
+                    gene = (gene.rstrip().split(':'))[1]
+                if gene_list!=None:
+                    if gene not in gene_list:
+                        continue
+                coll._gene_names.append(gene)
+
+
+                """ If the data (always log2) is a float, increment by 0.5 to round up """
+                if returnGenes==False:
+                    if UseDense:
+                        data_array.append(map(float,values[start:]))
+                    else:
+                        #data_array.append(map(lambda x: round(math.pow(2,float(x))),values[start:]))
+                        data_array.append(map(float,values[start:]))
+                    
+        if returnGenes:
+            """ Do not import the matrix at this point """
+            return list(coll._gene_names)
+        
+        if UseDense:
+            coll._matrix = np.array(data_array)
+        else:
+            """ Convert to a sparse matrix """
+            coll._matrix = sparse.csc_matrix(np.array(data_array))
+
+        coll._barcodes = np.array(coll._barcodes)
+        coll._gene_names = np.array(coll._gene_names)
+        coll._gene_ids = coll._gene_names
+
+        print('sparse matrix data imported from TSV file in %s seconds' % str(time.time()-startT))
+        #print (len(coll._gene_ids),len(coll._barcodes))
         return coll
     
     @staticmethod
@@ -220,7 +298,10 @@ class CellCollection:
         """
         Returns a (standard, non-sparse) sequence of expression values for a given cell
         """
+        #try:
         return self._matrix.getcol(cell_index).todense()
+        #except:
+        #    return self._matrix[:,cell_index] # ith column for existing dense matrix
 
     def centroid(self):
         """
@@ -292,9 +373,12 @@ class CellCollection:
         return self.subset_by_cell_index(barcode_index)
 
     def _filter_genes_by_index(self, gene_index):
+        #print(gene_index);sys.exit()
         self._matrix = self._matrix[gene_index, :]
         self._gene_ids = self._gene_ids[gene_index]
         self._gene_names = self._gene_names[gene_index]
+        #mat_array_original = self._matrix.toarray()
+        #print(len(mat_array_original))
 
     def filter_genes_by_symbol(self, symbol_list, data_type):
         """
@@ -308,7 +392,6 @@ class CellCollection:
         #print("Selecting {} genes".format(len(gene_subset)), file=sys.stderr)
         gene_index=[]
         gene_names = list(self._gene_names)
-        
         if data_type == 'txt':
             ### below code is problematic for h5 and probably sparse matrix files
             for gene in gene_subset:

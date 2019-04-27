@@ -37,6 +37,13 @@ def read_labels_dictionary(filename):
             label_dictionary[barcode]=label.rstrip()
     return label_dictionary
 
+def data_check(ref_h5_filename, query_h5_filename):
+    """ If h5 files, are both h5? """
+    if 'h5' in ref_h5_filename and 'h5' not in query_h5_filename:
+        return False
+    else:
+        return True
+    
 def find_nearest_cells(ref_h5_filename, query_h5_filename, gene_list=None, genome=None,
                         num_neighbors=10, num_trees=100, louvain_level=-1, min_cluster_correlation=-1):
     """
@@ -45,6 +52,9 @@ def find_nearest_cells(ref_h5_filename, query_h5_filename, gene_list=None, genom
     For parameter definitions, see partition_h5_file() and find_closest_cluster(), this is a convenience
     function that calls them (among others)
     """
+
+    ### Do the two input file formats match?
+    matching = data_check(ref_h5_filename, query_h5_filename)
     
     startT = time.time()
     if '.mtx' not in ref_h5_filename and '.h5' not in ref_h5_filename:
@@ -145,7 +155,10 @@ def find_shared_genes(h5_filename,genome=None,gene_list=None):
         if 'h5' in h5_filename:
             genes = CellCollection.from_cellranger_h5(h5_filename,returnGenes=True)
         elif 'txt' in h5_filename:
-            genes = CellCollection.from_tsvfile(h5_filename,genome,returnGenes=True,gene_list=gene_list)
+            try:
+                genes = CellCollection.from_tsvfile_alt(h5_filename,genome,returnGenes=True,gene_list=gene_list)
+            except:
+                genes = CellCollection.from_tsvfile(h5_filename,genome,returnGenes=True,gene_list=gene_list)
         else:
             genes = CellCollection.from_cellranger_mtx(h5_filename,genome,returnGenes=True)
         gene_list = list(set(genes) & set(gene_list))
@@ -173,7 +186,10 @@ def partition_h5_file(h5_filename, gene_list=None, num_neighbors=10, num_trees=1
         collection = CellCollection.from_cellranger_h5(h5_filename)
         data_type = 'h5'
     elif 'txt' in h5_filename:
-        collection = CellCollection.from_tsvfile(h5_filename,genome)
+        try:
+            collection = CellCollection.from_tsvfile_alt(h5_filename,genome,gene_list=gene_list)
+        except:
+            collection = CellCollection.from_tsvfile(h5_filename,genome)
         data_type = 'txt'
     else:
         collection = CellCollection.from_cellranger_mtx(h5_filename,genome)
@@ -201,7 +217,7 @@ def find_closest_cluster(query, ref, min_correlation=-1):
     """
     query_centroids, query_ids = compute_centroids(query)
     ref_centroids, ref_ids = compute_centroids(ref)
-
+    print('number of reference partions %d, number of query partions %d' % (len(ref_ids),len(query_ids)))
     all_correlations = np.corrcoef(np.concatenate((ref_centroids, query_centroids), axis=1), rowvar=False)
 
     # At this point, we have the correlations of everything vs everything.  We only care about query vs ref
@@ -214,6 +230,12 @@ def find_closest_cluster(query, ref, min_correlation=-1):
     return ( (query_ids[q], ref_ids[r]) for q, r in best_match if corr[r,q] >= min_correlation )
 
 if __name__ == "__main__":
+    # genes = read_gene_list('data/FinalMarkerHeatmap_all.txt')
+    # results = find_nearest_cells('data/reference-filtered_gene_bc_matrices_h5.h5', 
+    #                             'data/query-filtered_gene_bc_matrices_h5.h5',
+    #                             gene_list=genes, louvain_level=-1)
+    # write_results_to_file(results, 'temp.txt')
+
     from argparse import ArgumentParser
     parser = ArgumentParser(description="find the cells in reference_h5 that are most similar to the cells in query_h5")
     parser.add_argument("reference_h5", help="a CellRanger h5 file")
