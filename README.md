@@ -5,8 +5,6 @@ Python code for community-clustering based label project from a reference and qu
 
 Note, if the data is provided as a sparse (MM) .mtx file not contained in an .h5 file, separate feature and barcode name files (genes.tsv and barcodes.tsv or .gz versions of each, formatted as per cellRanger output) must be provided in the same directory as the expression data.
 
-![cellHarmony workflow](http://altanalyze.org/cellHarmony/Workflow.png) 
-
 ### Authors ###
 Phillip Dexheimer (CCHMC), Nathan Salomonis (CCHMC), AltAnalyze team
 
