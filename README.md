@@ -1,6 +1,7 @@
 # cellHarmony-Align # 
 
-![cellHarmony workflow](http://altanalyze.org/cellHarmony/cellHarmony-logo2.png)
+#![cellHarmony workflow](http://altanalyze.org/cellHarmony/cellHarmony-logo2.png)
+![cellHarmony workflow](http://altanalyze.org/cellHarmony/Workflow.png) 
 
 Python code for community-clustering based label project from a reference and query scRNA-Seq dataset (h5, mtx, txt or csv) to find cells in the reference that are most similar to cells in query. Each CellRanger h5 file is read and partitioned by clustering on the k-nearest neighbor graph. The h5 files can be restricted to marker genes (recommended) and annotated with a custom labels file (recommended). The GUI version of the program with additional functionality can be found at: [http://www.altanalyze.org](http://www.altanalyze.org). 
 
