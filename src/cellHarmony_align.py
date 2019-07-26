@@ -154,7 +154,7 @@ def find_shared_genes(h5_filename,genome=None,gene_list=None):
     if gene_list !=None:
         if 'h5' in h5_filename:
             genes = CellCollection.from_cellranger_h5(h5_filename,returnGenes=True)
-        elif 'txt' in h5_filename:
+        elif 'txt' in h5_filename or '.csv' in h5_filename:
             try:
                 genes = CellCollection.from_tsvfile_alt(h5_filename,genome,returnGenes=True,gene_list=gene_list)
             except:
@@ -185,7 +185,7 @@ def partition_h5_file(h5_filename, gene_list=None, num_neighbors=10, num_trees=1
     if 'h5' in h5_filename:
         collection = CellCollection.from_cellranger_h5(h5_filename)
         data_type = 'h5'
-    elif 'txt' in h5_filename:
+    elif 'txt' in h5_filename or '.csv' in h5_filename:
         try:
             collection = CellCollection.from_tsvfile_alt(h5_filename,genome,gene_list=gene_list)
         except:

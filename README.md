@@ -2,7 +2,9 @@
 
 ![cellHarmony workflow](http://altanalyze.org/cellHarmony/cellHarmony-logo2.png)
 
-Python code to align cells from a reference and query scRNA-Seq dataset (h5, mtx, txt or csv) to find cells in the reference that are most similar to cells in query. Each CellRanger h5 file is read and partitioned by clustering on the k-nearest neighbor graph. The h5 files can be restricted to marker genes (recommended) and annotated with a custom labels file (recommended). The GUI wrapper can be found at: [http://www.altanalyze.org](http://www.altanalyze.org)
+Python code for community-clustering based label project from a reference and query scRNA-Seq dataset (h5, mtx, txt or csv) to find cells in the reference that are most similar to cells in query. Each CellRanger h5 file is read and partitioned by clustering on the k-nearest neighbor graph. The h5 files can be restricted to marker genes (recommended) and annotated with a custom labels file (recommended). The GUI wrapper can be found at: [http://www.altanalyze.org](http://www.altanalyze.org). 
+
+Note, if the data is provided as a sparse (MM) .mtx file not contained in an .h5 file, separate feature and barcode name files (genes.tsv and barcodes.tsv or .gz versions of each, formatted as per cellRanger output) must be provided in the same directory as the expression data.
 
 ### Authors ###
 Phillip Dexheimer (CCHMC), Nathan Salomonis (CCHMC), AltAnalyze team
@@ -22,7 +24,7 @@ gzip
 
 ```typescript
 
-python scr/cellHarmony_align.py  reference/GSM3489185_Donor_02_h5.h5 query/GSM3489183_IPF_01_h5.h5 alignments.txt  --genes genes/markers.txt --lables labels/CustomLabels.txt
+python scr/cellHarmony_align.py  reference/GSM3489185_Donor_02_h5.h5 query/GSM3489183_IPF_01_h5.h5 alignments.txt  --genes genes/markers.txt --labels labels/CustomLabels.txt
 
 ```
 ```
